@@ -31,6 +31,8 @@ public class VirtualFSTest {
 	public static void setUpClass() {
 		ROOT.mkdirs();
 		EXTERNAL.mkdirs();
+		assertTrue("Root file system could not be created!", ROOT.exists());
+		assertTrue("External file system could not be created!", EXTERNAL.exists());
 	}
 
 	@AfterClass
