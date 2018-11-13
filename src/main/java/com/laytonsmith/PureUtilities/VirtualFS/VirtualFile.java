@@ -51,4 +51,12 @@ public class VirtualFile {
 	public String toString() {
 		return getPath();
 	}
+
+	/**
+	 * Returns the parts of the path. If this is an absolute path, the first entry in the array will be an empty string.
+	 * @return
+	 */
+	String[] getPathParts() {
+		return path.split("/");
+	}
 }

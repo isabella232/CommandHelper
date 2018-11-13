@@ -31,8 +31,8 @@ public final class SystemVirtualFileSystemManifest implements VirtualFileSystemM
 
 	/**
 	 * There should only be one accessor for the manifest file in the system, but for test purposes, it may be
-	 * useful to mock the interface. This method is used to get the instance for each manifest file (of which
-	 * there will most likely ever only be one). A file listener will be added to the underlying file so that
+	 * useful to mock the interface. This method is used to get the instance for each manifest file.
+	 * A file listener will be added to the underlying file so that
 	 * changes from other processes can be reflected here as well, but the file can be manually refreshed as well.
 	 * @param manifestFile The underlying manifest file.
 	 * @return The VirtualFileSystemManifest wrapping the given manifestFile
