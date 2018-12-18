@@ -8,7 +8,6 @@ import com.laytonsmith.PureUtilities.CommandExecutor;
 import com.laytonsmith.PureUtilities.Common.ArrayUtils;
 import com.laytonsmith.PureUtilities.Common.FileUtil;
 import com.laytonsmith.PureUtilities.Common.Misc;
-import com.laytonsmith.PureUtilities.Common.OSUtils;
 import com.laytonsmith.PureUtilities.Common.RSAEncrypt;
 import com.laytonsmith.PureUtilities.Common.StreamUtils;
 import com.laytonsmith.PureUtilities.Common.StringUtils;
@@ -21,7 +20,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.precompiler.Precompiler;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigCompileGroupException;
@@ -31,7 +30,6 @@ import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistence.PersistenceNetwork;
 import com.laytonsmith.persistence.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.ExampleLocalPackageInstaller;
@@ -101,6 +99,9 @@ public class Main {
 	private static final ArgumentParser UI_MODE;
 	private static final ArgumentParser NEW_MODE;
 	private static final ArgumentParser SITE_DEPLOY;
+	private static final ArgumentParser NEW_PROJECT_MODE;
+	private static final ArgumentParser COMPILE_MODE;
+	private static final ArgumentParser EXECUTE_MODE;
 
 	static {
 		MethodScriptFileLocations.setDefault(new MethodScriptFileLocations());
@@ -260,6 +261,21 @@ public class Main {
 				.addArgument("Location and name to create the script as. Multiple arguments can be provided, and they will create multiple files.", "<file>", true)
 				.addFlag('f', "force", "Forces the file to be overwritten, even if it already exists");
 		suite.addMode("new", NEW_MODE);
+
+		NEW_PROJECT_MODE = ArgumentParser.GetParser()
+				.addDescription("Creates the base files necessary for a new compilable project.")
+				.addArgument("The project location. If the directory does not exist, it is created.", "<directory>",
+						true);
+		suite.addMode("new-project", NEW_PROJECT_MODE);
+		COMPILE_MODE = ArgumentParser.GetParser()
+				.addDescription("")
+				.addArgument("config", "Default to build.ini, but can be changed here. If the specified config file is"
+						+ " not present, it is not created. To create a template, use the new-project tool.", false);
+		suite.addMode("compile", COMPILE_MODE);
+		EXECUTE_MODE = ArgumentParser.GetParser()
+				.addDescription("Executes a precompiled .msc file")
+				.addArgument("The file to execute", "<file>", true);
+		suite.addMode("execute", EXECUTE_MODE);
 
 		ARGUMENT_SUITE = suite;
 	}
@@ -711,25 +727,18 @@ public class Main {
 				File config = new File(configString);
 				SiteDeploy.run(generatePrefs, useLocalCache, config, "", doValidation, !noProgressClear);
 			} else if(mode == NEW_MODE) {
-				String li = OSUtils.GetLineEnding();
 				for(String file : parsedArgs.getStringListArgument()) {
 					File f = new File(file);
-					if(f.exists() && !parsedArgs.isFlagSet('f')) {
-						System.out.println(file + " already exists, refusing to create");
-						continue;
-					}
-					f.createNewFile();
-					f.setExecutable(true);
-					FileUtil.write("#!/usr/bin/env /usr/local/bin/mscript"
-							+ li
-							+ "<!" + li
-							+ "\tstrict;" + li
-							+ "\tname: " + f.getName() + ";" + li
-							+ "\tauthor: " + StaticLayer.GetConvertor().GetUser(null) + ";" + li
-							+ "\tcreated: " + new Scheduling.simple_date().exec(Target.UNKNOWN, null, new CString("yyyy-MM-dd", Target.UNKNOWN)).val() + ";" + li
-							+ "\tdescription: " + ";" + li
-							+ ">" + li + li, f, true);
+					Precompiler.initializeFile(f, parsedArgs.isFlagSet('f'));
 				}
+			} else if(mode == NEW_PROJECT_MODE) {
+				String file = parsedArgs.getStringArgument();
+				Precompiler.initialize(new File(file));
+				System.exit(0);
+			} else if(mode == COMPILE_MODE) {
+				String config = parsedArgs.getStringArgument();
+				File f = new File(config);
+				Precompiler.compile(f.getParentFile(), f.getName());
 			} else {
 				throw new Error("Should not have gotten here");
 			}

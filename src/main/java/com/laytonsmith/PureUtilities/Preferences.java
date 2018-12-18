@@ -78,19 +78,19 @@ public class Preferences {
 		/**
 		 * The name of the preference
 		 */
-		public String name;
+		public final String name;
 		/**
 		 * The value of the preference, as a string
 		 */
-		public String value;
+		public final String value;
 		/**
 		 * The allowed type of this value
 		 */
-		public Type allowed;
+		public final Type allowed;
 		/**
 		 * The description of this preference. Used to write out to file.
 		 */
-		public String description;
+		public final String description;
 
 		/**
 		 * The object representation of this value. Should not be used directly.
@@ -374,7 +374,7 @@ public class Preferences {
 	}
 
 	/**
-	 * Sets the comment line length.
+	 * Sets the comment line length. Defaults to 120.
 	 *
 	 * @param lineLength The length, an integer greater than 0.
 	 * @throws IllegalArgumentException If {@code lineLength} is less than 1.

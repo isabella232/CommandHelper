@@ -218,6 +218,7 @@ public final class Interpreter {
 		doStartup();
 		env.getEnv(GlobalEnv.class).SetRootFolder(new File(cwd));
 		if(inTTYMode) {
+			env.getEnv(GlobalEnv.class).SetCustom("compiler", true);
 			//Ok, done. They'll have to execute from here.
 			return;
 		}

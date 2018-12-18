@@ -1277,7 +1277,7 @@ public final class Static {
 		}
 		//Ok, it's not absolute, so we need to see if we're in cmdline mode or not.
 		//If so, we use the root directory, not the target.
-		if(env != null && InCmdLine(env)) {
+		if(env != null && InCmdLine(env) && !InCompiler(env)) {
 			return new File(env.getEnv(GlobalEnv.class).GetRootFolder(), arg);
 		} else if(t.file() == null) {
 			throw new CREIOException("Unable to receive a non-absolute file with an unknown target", t);
@@ -1295,6 +1295,17 @@ public final class Static {
 	public static boolean InCmdLine(Environment environment) {
 		return environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean
 				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline");
+	}
+
+	/**
+	 * Returns true if currently running in the compiler mode. Compiler mode is when the interpreter was
+	 * launched with the file name, rather than in REPL mode.
+	 * @param environment
+	 * @return
+	 */
+	public static boolean InCompiler(Environment environment) {
+		return environment.getEnv(GlobalEnv.class).GetCustom("compiler") instanceof Boolean
+				&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("compiler");
 	}
 
 	/**
